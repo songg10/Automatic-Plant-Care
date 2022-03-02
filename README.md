@@ -1,1 +1,1 @@
-# Automatic-Plant-C-e
+# Automatic Plant Care
