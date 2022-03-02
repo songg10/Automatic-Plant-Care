@@ -1,51 +1,43 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-//#include <Adafruit_BBIO.GPIO.h>
-#define GPIO_dir "/sys/class/gpio/gpio30/direction"
-#define GPIO_val "/sys/class/gpio/gpio30/value"
-//#define I2CDRV_LINUX_BUS2 "/dev/i2c-2"
-//#define I2C_DEVICE_ADDRESS 0x3c
-//#define RELAY "P9_22"
 
-void writeToFile(char *fileName, char *value) {
-  FILE *file = fopen(fileName, "w");
-  int charWritten = fprintf(file, "%s", value);
-  if (charWritten <= 0)
-    printf("ERROR: Write");
+#include "utils.h"
 
-  fclose(file);
-}
+// Place holder GPIO ports as the hardware has not 
+// been physically connected
+#define GPIO     "/sys/class/gpio/export"
+#define GPIO_NUM "30"
+#define GPIO_DIR "/sys/class/gpio/gpio30/direction"
+#define GPIO_VAL "/sys/class/gpio/gpio30/value"
 
-void nsleep(long sec, long nanosec) {
+static void nsleep(long sec, long nanosec) {
   long seconds = sec;
   long nanoseconds = nanosec;
   struct timespec reqDelay = {seconds, nanoseconds};
   nanosleep(&reqDelay, (struct timespec *)NULL);
 }
 
-/*int initI2cBus(char *bus, int address) {
-    int fd = open(bus, O_RDWR);
-    if(fd < 0) {
-        printf("i2c: Unable to open bus for read/write (%s)\n", bus);
-        exit(-1);
-    }
-    int result = ioctl(fd, I2C_SLAVE, address);
-    if(result < 0) {
-        printf("i2c: Unable to set i2c device to slave address\n");
-        exit(-1);
- }
- return fd;
-}*/
+// Initialize the GPIO for controlling the pump (must be called before anything else)
+void PC_initPump() {
+  // Export the GPIO pins
+  Utils_writeToFile(GPIO, GPIO_NUM);
 
-int main () {
-    //start watering for 5s
-    writeToFile(GPIO_dir, "out");
-    writeToFile(GPIO_val, "0");
-    nsleep(5,0);
-    //stop watering
-    writeToFile(GPIO_dir, "out");
-    writeToFile(GPIO_val, "1");
+  // Set up the GPIO pin as output
+  Utils_writeToFile(GPIO_DIR, "out");
+}
 
-    return 0;
+// Start pumping water 
+void PC_startPump() {
+  Utils_writeToFile(GPIO_VAL, "1");
+}
+
+void PC_stopPump() {
+  Utils_writeToFile(GPIO_VAL, "0");
+}
+
+void PC_timePump(long sec, long nanosec) {
+  PC_startPump();
+  nsleep(sec, nanosec);
+  PC_stopPump();
 }
