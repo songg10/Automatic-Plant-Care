@@ -22,4 +22,7 @@ int Health_getLightHealth(void);
 // 1: Healthy
 bool Health_getMoistureHealth(void);
 
+// Configure the email for notifications
+void Health_setUserEmail(char *email);
+
 #endif 

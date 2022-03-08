@@ -1,15 +1,24 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <string.h>
 
 // User-defined header
 #include "health_monitor.h"
 #include "light_sensor.h"
 #include "pump_control.h"
 
+#define MAX_EMAIL_SIZE 50
+
 // Private variables
 static bool stop;
 static pthread_t monitor_t;
+char email[MAX_EMAIL_SIZE];
+
+static void send_email_noti(int moist, int light) {
+    // Call the python script to generate the email to the user
+    execlp("python3", "python3", "plant_email.py", "-e", email, "-m", moist, "-l", light, NULL);
+}
 
 // Monitoring the plant's moisture level
 // Check the moisture level every 5 minutes
@@ -20,10 +29,17 @@ static void *startMonitoring(void *input) {
         // Get the moisture level
         // If the moisture level is below critical level
         // Start the pump for 1.5 second
-        int moisture_level = Moisture_getMoistLevel();
-        if (moisture_level < 580) {
+        bool moisture_health = Health_getMoistureHealth();
+        if (moisture_health == 0) {
             PC_timePump(1, 500000000);
         }
+
+        int light_health = Health_getLightHealth();
+
+        // If either of a condition is below critical level
+        // Generate the email notifying the user
+        if (moisture_health == 0 || light_health == 0)
+            send_email_noti(moisture_health, light_health);
 
         // Check once every 5 minutes
         sleep(300);
@@ -84,3 +100,8 @@ bool Health_getMoistureHealth(void) {
 
     return 1;
 }   
+
+// Configure the email for notifications
+void Health_setUserEmail(char *user_email) {
+    strncpy(email, user_email, MAX_EMAIL_SIZE);
+}
