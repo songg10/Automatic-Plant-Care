@@ -7,7 +7,7 @@
 #include "light_sensor.h"
 #include "utils.h"
 
-#define A2D_FILE_VOLTAGE    "/sys/bus/iio/devices/iio:device0/in_voltage1_raw"
+#define A2D_FILE_VOLTAGE    "/sys/bus/iio/devices/iio:device6/in_voltage1_raw"
 #define A2D_VOLTAGE_REF_V   3.3
 #define A2D_MAX_READING     4095
 #define SQR(x)              x*x
