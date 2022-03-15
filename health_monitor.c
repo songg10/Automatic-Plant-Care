@@ -9,6 +9,7 @@
 #include "health_monitor.h"
 #include "light_sensor.h"
 #include "pump_control.h"
+#include "moisture_sensor.h"
 
 #define MAX_EMAIL_SIZE 50
 
