@@ -213,9 +213,10 @@ static void *startServer(void *input) {
 
                 snprintf(messageTx, MSG_MAX_LEN, "email:%s\n", email);
             } else if (!strncmp(tok, "moist\n", MSG_MAX_LEN)) {
-                int moist_level = Moisture_getMoistLevel();
+                // Moisture_readSensor();
+                int moist_level = Moisture_getStatus();
                 char moist_level_text[STATUS_MAX_LEN];
-                if (moist_level < 1) {
+                if (moist_level < 0) {
                     strncpy(moist_level_text, "Deficient", STATUS_MAX_LEN);
                 } else if (moist_level == 0) {
                     strncpy(moist_level_text, "Moderate", STATUS_MAX_LEN);
@@ -227,7 +228,7 @@ static void *startServer(void *input) {
             } else if (!strncmp(tok, "light\n", MSG_MAX_LEN)) {
                 int light_level = Light_getStatus();
                 char light_level_text[STATUS_MAX_LEN];
-                if (light_level < 1) {
+                if (light_level < 0) {
                     strncpy(light_level_text, "Deficient", STATUS_MAX_LEN);
                 } else if (light_level == 0) {
                     strncpy(light_level_text, "Moderate",  STATUS_MAX_LEN);
@@ -235,7 +236,7 @@ static void *startServer(void *input) {
                     strncpy(light_level_text, "Excessive",  STATUS_MAX_LEN);
                 }
 
-                snprintf(messageTx, MSG_MAX_LEN, "moist:%s\n", light_level_text);
+                snprintf(messageTx, MSG_MAX_LEN, "light:%s\n", light_level_text);
             } else if (!strncmp(tok, "moist_min\n", MSG_MAX_LEN)) {
                 int threshold = Moisture_getMinThreshold();
 
