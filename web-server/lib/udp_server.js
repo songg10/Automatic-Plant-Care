@@ -7,25 +7,25 @@ var socketio = require('socket.io');
 var io;
 
 // Adopted from: https://stackoverflow.com/a/51084163
-const exec = require('child_process').exec;
-const isRunning = (query, cb) => {
-    let platform = process.platform;
-    let cmd = '';
-    switch (platform) {
-        case 'win32' : cmd = `tasklist`; break;
-        case 'darwin' : cmd = `ps -ax | grep ${query}`; break;
-        case 'linux' : cmd = `ps -A`; break;
-        default: break;
-    }
-    exec(cmd, (err, stdout, stderr) => {
-        cb(stdout.toLowerCase().indexOf(query.toLowerCase()) > -1);
-    });
-}
+// const exec = require('child_process').exec;
+// const isRunning = (query, cb) => {
+//     let platform = process.platform;
+//     let cmd = '';
+//     switch (platform) {
+//         case 'win32' : cmd = `tasklist`; break;
+//         case 'darwin' : cmd = `ps -ax | grep ${query}`; break;
+//         case 'linux' : cmd = `ps -A`; break;
+//         default: break;
+//     }
+//     exec(cmd, (err, stdout, stderr) => {
+//         cb(stdout.toLowerCase().indexOf(query.toLowerCase()) > -1);
+//     });
+// }
 
 var dgram = require('dgram');
 
 // Include the module to work with filesystem
-var fs   = require('fs');
+// var fs   = require('fs');
 
 exports.listen = function(server) {
 	io = socketio.listen(server);
@@ -38,16 +38,16 @@ exports.listen = function(server) {
 
 function handleCommand(socket) {
 	// Pased string of comamnd to relay
-	socket.on('beat_box', function(data) {
-		console.log('beat_box: ' + data);
+	socket.on('plant-care', function(data) {
+		console.log('plant-care: ' + data);
 
 		// Adopted from: https://stackoverflow.com/a/51084163
-		isRunning('beat-box', (status) => {
-			if (!status) {
-				emitDaError(socket, "UDP", 
-					"Server Error: No response from the C beat-box applicaiton. Is it running?");
-			}
-		})
+		// isRunning('beat-box', (status) => {
+		// 	if (!status) {
+		// 		emitDaError(socket, "UDP", 
+		// 			"Server Error: No response from the C beat-box applicaiton. Is it running?");
+		// 	}
+		// })
 
 		// Info for connecting to the local process via UDP
 		var PORT = 12345;
@@ -74,7 +74,7 @@ function handleCommand(socket) {
 			var replyChunk = reply.split(" ");
 			if (reply[0] === "Invalid") {
 				emitDaError(socket, "UDP", 
-					"Invalid reply from the beat-box application!");
+					"Invalid reply from the application!");
 			} else {
 				socket.emit('commandReply', reply);
 			}
@@ -87,31 +87,6 @@ function handleCommand(socket) {
 		});
 		client.on("UDP Client: error", function(err) {
 			console.log("error: ",err);
-		});
-	});
-
-	socket.on('proc', function(fileName) {
-		// NOTE: Very unsafe? Why?
-		// Hint: think of ../
-		var absPath = "/proc/" + fileName;
-		console.log('accessing ' + absPath);
-		
-		fs.exists(absPath, function(exists) {
-			if (exists) {
-				// Can use 2nd param: 'utf8', 
-				fs.readFile(absPath, function(err, fileData) {
-					if (err) {
-						emitDaError(socket, fileName,
-							"ERROR: Unable to read file " + absPath)
-					} else {
-						emitSocketData(socket, fileName, 
-								fileData.toString('utf8'));
-					}
-				});
-			} else {
-				emitDaError(socket, fileName, 
-					"ERROR: File " + absPath + " not found.");
-			}
 		});
 	});
 };

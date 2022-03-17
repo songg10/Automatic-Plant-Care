@@ -6,28 +6,28 @@ var socket = io.connect();
 
 var errorTime;
 
-// Emulate enum in C
-const NO_ERROR     = 0
-const NODEJS_ERROR = 1;
-const UDP_ERROR    = 2
-var error_origin   = NO_ERROR;
-
 $(document).ready(function() {
-	sendCommand("pump off\n")
+	sendCommand("pump off\n");
+	sendCommand("get moist_min\n");
+	sendCommand("get moist_max\n");
+	sendCommand("get light_max\n");
+	sendCommand("get light_min\n");
+
 	// Hide the error box
 	$("#error-box").hide();
 
-	// Adjust pump
+	// Adjust email
 	$("#confirmEmail").click(function(){
 		var value = $("#userEmail").val()
 		sendCommand("email " + value + "\n");
 	});
 	$("#sampleEmail").click(function(){
 		var value = $("#userEmail").val()
-		sendCommand("email " + value + "\n" + "sample\n");
+		sendCommand("email " + value + "\n");
+		sendCommand("sample\n");
 	});
 
-	// Adjust email
+	// Adjust pump
 	$("#pumpOn").click(function(){
 		sendCommand("pump on\n");
 	});
@@ -36,23 +36,29 @@ $(document).ready(function() {
 	});
 
 	// Adjust Min
-	$("range-slider-moist-min").on("slidechange", function(event, ui) {
-		$("#input-slider-moist-min").val(ui.value)
-		sendCommand("moisture_min " + ui.value + "\n")
+	$("#range-slider-moist-min").on("change", function() {
+		var value = $(this).val();
+		console.log("change");
+		$("#input-slider-moist-min").val(value);
+		sendCommand("moist_min " + value + "\n");
 	});
-	$("range-slider-light-min").on("slidechange", function(event, ui) {
-		$("#input-slider-light-min").val(ui.value)
-		sendCommand("light_min " + ui.value + "\n")
+
+	$("#range-slider-light-min").on("change", function() {
+		var value = $(this).val();
+		$("#input-slider-light-min").val(value);
+		sendCommand("light_min " + value + "\n");
 	});
 
 	// Adjust Max
-	$("range-slider-moist-max").on("slidechange", function(event, ui) {
-		$("#input-slider-moist-max").val(ui.value)
-		sendCommand("moisture_max " + ui.value + "\n")
+	$("#range-slider-moist-max").on("change", function() {
+		var value = $(this).val();
+		$("#input-slider-moist-max").val(value);
+		sendCommand("moist_max " + value + "\n");
 	});
-	$("range-slider-light-max").on("slidechange", function(event, ui) {
-		$("#input-slider-light-max").val(ui.value)
-		sendCommand("light_max " + ui.value + "\n")
+	$("#range-slider-light-max").on("change", function() {
+		var value = $(this).val();
+		$("#input-slider-light-max").val(value);
+		sendCommand("light_max " + value + "\n");
 	});
 
 	// Setup a repeating function (every 1s)
@@ -62,7 +68,7 @@ $(document).ready(function() {
 });
 
 function sendCommand(message) {
-	socket.emit('beat_box', message);
+	socket.emit('plant-care', message);
 };
 
 function getUpdate() {
@@ -74,16 +80,9 @@ function getUpdate() {
 function handleReplies() {
 	// Display the received data
 	socket.on("commandReply", function(result) {
-		if (error_origin == UDP_ERROR) {
-			// setTimeout(function() {
-			// 	console.log("UDP ERROR CLEAR");
-			// 	$("#error-box").hide();
-			// }, 10000);
-			clearTimeout(errorTime);
-			$("#error-box").hide();
-		}
+		$("#error-box").hide();
 
-		console.log(result);
+		// console.log(result);
 		var reply = result.trim().split(":")
 		switch (reply[0]) {
 			case "email":
@@ -92,13 +91,28 @@ function handleReplies() {
 			case "pump":
 				$("#pumpStatus").text(reply[1]);
 				break;
-			case "light":
-				$("#lightStatus").val(reply[1]);
-				break;
 			case "moist":
-				$("#moistStatus").val(reply[1]);
+				$("#moistStatus").html(reply[1]);
 				break;
-
+			case "moist_min":
+				$("#range-slider-moist-min").val(reply[1]);
+				$("#input-slider-moist-min").val(reply[1]);
+				break;
+			case "moist_max":
+				$("#range-slider-moist-max").val(reply[1]);
+				$("#input-slider-moist-max").val(reply[1]);
+				break;
+			case "light":
+				$("#lightStatus").html(reply[1]);
+				break;
+			case "light_min":
+				$("#range-slider-light-min").val(reply[1]);
+				$("#input-slider-light-min").val(reply[1]);
+				break;
+			case "light_max":
+				$("#range-slider-light-max").val(reply[1]);
+				$("#input-slider-light-max").val(reply[1]);
+				break;
 			default:
 				break;
 		}
@@ -107,6 +121,5 @@ function handleReplies() {
 	socket.on("DaError", function(result) {
 		$("#error-box").show();
 		$("#error-text").text(result.contents);
-		error_origin = UDP_ERROR;
 	});
 }
