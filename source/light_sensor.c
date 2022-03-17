@@ -15,8 +15,8 @@
 #define MAX                 4095
 
 // Store the safety threshold for the plant's light level
-static unsigned int MIN_LIGHT = 2400;
-static unsigned int MAX_LIGHT = 2400;
+static unsigned int MIN_LIGHT = 0;
+static unsigned int MAX_LIGHT = 4000;
 
 // meaning of 'precision': the returned answer should be base^x, where
 //                         x is in [power-precision/2,power+precision/2]

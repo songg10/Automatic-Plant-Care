@@ -14,7 +14,7 @@
 #define MAX 4095
 
 // Store the safety threshold for the plant's moisture level
-static unsigned int MIN_MOIST = 2400;
+static unsigned int MIN_MOIST = 10;
 static unsigned int MAX_MOIST = 2400;
 static int moist_raw;
 static float moist_temp;
@@ -22,13 +22,13 @@ static float moist_temp;
 // Read the data from the sensor
 void Moisture_readSensor(void) {
     // Read data from moisture sensor using Adafruit's Python library
-    system("python3 scripts/moisture_sensor.py > /dev/null");
+    system("python3 scripts/moisture_sensor.py");
 
     // Read the data read from Python into C
     FILE* ptr;
     {
         // Opening file in reading mode
-        ptr = fopen("scripts/moisture.data", "r");
+        ptr = fopen("moisture.data", "r");
     
         if (NULL == ptr) {
             printf("Can't read moist data\n");
@@ -90,11 +90,9 @@ int Moisture_getMaxThreshold() {
 int Moisture_getStatus(void) {
     int moisture_level = Moisture_getMoistLevel();
     if (moisture_level > MAX_MOIST)
-        moisture_level = 1;
+        return 1;
     else if (moisture_level >= MIN_MOIST && moisture_level <= MAX_MOIST)
-        moisture_level = 0;
-    else 
-        moisture_level = -1;
+        return 0;
 
-    return 1;
+    return -1;
 }   
