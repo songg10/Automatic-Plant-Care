@@ -44,15 +44,18 @@ static void send_email_noti(int moist, int light, bool isSample) {
 static void *startMonitoring(void *input) {
     while (!stop) {
         // Get the moisture and light level
+        Moisture_readSensor();
         int moisture_health = Moisture_getStatus();
         int light_health = Light_getStatus();
 
+        // printf("moist_health = %d\n", moisture_health);
+        // printf("light health = %d\n", light_health);
         // If either of a condition is below critical level
         // Generate the email notifying the user
-        if (moisture_health == 0 || light_health == 0){
+        if (moisture_health != 0 || light_health != 0){
             // If the moisture level is below critical level
             // Start the pump for 1.5 second
-            if (moisture_health == 0) {
+            if (moisture_health < 0) {
                 PC_timePump(1, 500000000);
             }
 
