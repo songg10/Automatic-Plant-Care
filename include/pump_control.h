@@ -17,6 +17,9 @@ void PC_startPump(void);
 // Stop pumping water
 void PC_stopPump(void);
 
+// Toggle the pump
+void PC_togglePump(void);
+
 // Pump water for the duration specified
 void PC_timePump(long sec, long nanosec);
 

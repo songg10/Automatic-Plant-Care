@@ -14,7 +14,7 @@ def getMoisture():
 def getTemp():
     return ss.get_temp()
 
-with open("moisture.data", "w") as moist_f:
+with open("moisture.dat", "w") as moist_f:
     moist_raw = getMoisture()
     moist_f.writelines("{}\n".format(moist_raw))
 

@@ -48,8 +48,6 @@ static void *startMonitoring(void *input) {
         int moisture_health = Moisture_getStatus();
         int light_health = Light_getStatus();
 
-        // printf("moist_health = %d\n", moisture_health);
-        // printf("light health = %d\n", light_health);
         // If either of a condition is below critical level
         // Generate the email notifying the user
         if (moisture_health != 0 || light_health != 0){
@@ -61,9 +59,9 @@ static void *startMonitoring(void *input) {
 
             send_email_noti(moisture_health, light_health, false);
         }
-
-        // Check once every 2 minutes
-        sleep(120);
+        
+        // Check once every 15 seconds
+        sleep(15);
     }
 
     return NULL;

@@ -12,6 +12,9 @@ int Moisture_getMoistLevel(void);
 // Return the temperature in Celsius
 float Moisture_getTemp(void);
 
+// Return the VMC percantage
+int Moisture_getVMC(void);
+
 // Set the minimum safety threshold for moisture level
 void Moisture_setMinThreshold(int min);
 

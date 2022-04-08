@@ -10,14 +10,18 @@
 
 #include "moisture_sensor.h"
 
-#define MIN 0
-#define MAX 4095
+#define RAW_MIN 200
+#define RAW_MAX 2000
+
+#define MIN_VMC 0
+#define MAX_VMC 100
 
 // Store the safety threshold for the plant's moisture level
-static unsigned int MIN_MOIST = 10;
-static unsigned int MAX_MOIST = 2400;
-static int moist_raw;
-static float moist_temp;
+static int MIN_MOIST = MIN_VMC;
+static int MAX_MOIST = MAX_VMC;
+
+static int moist_raw = 200;
+static float moist_temp = 20.0;
 
 // Read the data from the sensor
 void Moisture_readSensor(void) {
@@ -28,7 +32,7 @@ void Moisture_readSensor(void) {
     FILE* ptr;
     {
         // Opening file in reading mode
-        ptr = fopen("moisture.data", "r");
+        ptr = fopen("moisture.dat", "r");
     
         if (NULL == ptr) {
             printf("Can't read moist data\n");
@@ -59,9 +63,15 @@ float Moisture_getTemp(void) {
     return moist_temp;
 }
 
+// Return the VMC percantage
+int Moisture_getVMC(void) {
+    int vmc = (float)moist_raw/(float)RAW_MAX*100;
+    return vmc;
+}
+
 // Set the minimum safety threshold for moisture level
 void Moisture_setMinThreshold(int min) {
-    if (min < MIN || min > MAX_MOIST)
+    if (min < MIN_VMC || min > MAX_MOIST)
         return;
     MIN_MOIST = min;
 }
@@ -73,7 +83,7 @@ int Moisture_getMinThreshold(void) {
 
 // Set the maximum safety threshold for moisture level
 void Moisture_setMaxThreshold(int max) {
-    if (max > MAX || max < MIN_MOIST) 
+    if (max > MAX_VMC || max < MIN_MOIST) 
         return;
     MAX_MOIST = max;
 }
@@ -88,7 +98,7 @@ int Moisture_getMaxThreshold() {
 // 1  : Excessive
 // -1 : Deficient
 int Moisture_getStatus(void) {
-    int moisture_level = Moisture_getMoistLevel();
+    int moisture_level = Moisture_getVMC();
     if (moisture_level > MAX_MOIST)
         return 1;
     else if (moisture_level >= MIN_MOIST && moisture_level <= MAX_MOIST)

@@ -3,11 +3,8 @@
 #ifndef _LIGHT_SENSOR_H_
 #define _LIGHT_SENSOR_H_
 
-// Returns the raw sensor voltage reading
-int Light_getRawVoltage();
-
 // Convert the voltage reading into lumens (unit for measuring light)
-double Light_getLumens ();
+int Light_getLumens ();
 
 // Set the minimum safety threshold for light level
 void Light_setMinThreshold(int min);
