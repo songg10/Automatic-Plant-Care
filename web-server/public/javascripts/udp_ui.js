@@ -75,6 +75,7 @@ function getUpdate() {
 	// Get the current volume, tempo, mode
 	sendCommand("get light\n");
 	sendCommand("get moist\n");
+	sendCommand("get pump\n");
 }
 
 function handleReplies() {

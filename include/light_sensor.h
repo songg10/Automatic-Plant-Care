@@ -4,7 +4,7 @@
 #define _LIGHT_SENSOR_H_
 
 // Convert the voltage reading into lumens (unit for measuring light)
-int Light_getLumens ();
+double Light_getLumens ();
 
 // Set the minimum safety threshold for light level
 void Light_setMinThreshold(int min);

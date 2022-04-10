@@ -10,41 +10,35 @@
 #define A2D_FILE_VALUE      "/sys/bus/iio/devices/iio:device0/in_voltage6_raw"
 #define A2D_VOLTAGE_REF_V   1.8
 #define MAX_RAW             4095    
-#define LOG_RANGE           5       // 3.3V = 10^5 lux
 
 #define MIN_LUX             0       // 0 lux
 #define MAX_LUX             130000  // 130,000 lux
+
+#define SQR(x)              x*x
 
 // Store the safety threshold for the plant's light level
 static unsigned int MIN_LIGHT = MIN_LUX;      
 static unsigned int MAX_LIGHT = MAX_LUX; 
 
-/* Function to calculate x raised to the power y in O(logn)
-    Time Complexity of optimized solution: O(logn)
-*/
-// Adopted from: https://stackoverflow.com/a/26860684
-int power2 (int x, unsigned int y)
-{
-    int temp;
-    if (y == 0)
-        return 1;
-
-    temp = power2 (x, y / 2);
-    if ((y % 2) == 0)
-        return temp * temp;
-    else
-        return x * temp * temp;
+// meaning of 'precision': the returned answer should be base^x, where
+//                         x is in [power-precision/2,power+precision/2]
+static double mypow( double base, double power, double precision ) {   
+   if ( power < 0 ) return 1 / mypow( base, -power, precision );
+   if ( power >= 10 ) return SQR( mypow( base, power/2, precision/2 ) );
+   if ( power >= 1 ) return base * mypow( base, power-1, precision );
+   if ( precision >= 1 ) return sqrt( base );
+   return sqrt( mypow( base, power*2, precision*2 ) );
 }
 
 // Convert the raw reading into lumens (unit for measuring light)
-int Light_getLumens () {
+double Light_getLumens () {
     // Get the raw reading
     int raw = Utils_readFromFileToScreen(A2D_FILE_VALUE);
 
     // Convert to lumens 
-    float logLux = raw * LOG_RANGE / MAX_RAW;
+    double lux = ((double)raw / MAX_RAW) * A2D_VOLTAGE_REF_V;
 
-    return power2(10, ceil(logLux));
+    return 27.565 * mypow(10, lux, .000001);
 }
 
 // Set the minimum safety threshold for light level

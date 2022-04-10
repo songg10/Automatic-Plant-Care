@@ -2,11 +2,16 @@
 #define _GUI_DATA
 
 #include <stdbool.h>
-#include <sys/types.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
-#define LCD_REQUEST  "lcd_request"
-#define LCD_RESPONSE "lcd_response"
+#define LCD_REQUEST     "tmp/lcd_request"
+#define LCD_RESPONSE    "tmp/lcd_response"
+
+#define UNOPEN -1
 
 typedef struct {
     int vmc;                // in VMC percentage
@@ -19,18 +24,14 @@ typedef struct {
     bool togglePump;        // Toggle the pump
 } LCD_Request;
 
+#ifndef GUI
+
 // Initialize LCD hanlder
 void LCD_init();
 
 // Clean up the LCD handler
 void LCD_cleanUp();
 
-// Write the data to the FIFO
-void LCD_generateResponse(LCD_Response *res);
-void LCD_generateRequest(LCD_Request *req);
-
-// Read the request from the FIFO
-ssize_t LCD_getResponse(LCD_Response *res);
-ssize_t LCD_getRequest(LCD_Request *req);
+#endif
 
 #endif

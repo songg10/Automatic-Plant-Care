@@ -32,7 +32,7 @@ void Moisture_readSensor(void) {
     FILE* ptr;
     {
         // Opening file in reading mode
-        ptr = fopen("moisture.dat", "r");
+        ptr = fopen("tmp/moisture.dat", "r");
     
         if (NULL == ptr) {
             printf("Can't read moist data\n");

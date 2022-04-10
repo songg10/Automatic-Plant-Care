@@ -1,11 +1,9 @@
-#include <stdio.h> 
-#include <fcntl.h>
-#include <stdlib.h>
-#include <sys/stat.h>
+#include <stdio.h>
+#include <poll.h> 
 #include "lcd.h"
 
 // Preprocessor macro to avoid compiling this portion for the GUI
-#ifndef GUI
+// #ifndef GUI
 #include <pthread.h>
 #include "pump_control.h"
 #include "moisture_sensor.h"
@@ -17,34 +15,46 @@ static bool stop;
 static pthread_t lcd_t;
 
 static void *startLCDHandler(void *input) {
+    // Open the request FIFO
+    int req_fifo = open(LCD_REQUEST,O_RDONLY|O_NONBLOCK);
+    if (req_fifo == -1) {
+		printf("lcd: Unable to access request FIFO\n");
+	}
+
+    // Mark the LCD response fifo as unopen (the read end must be opened first)
+    int res_fifo = UNOPEN;
+
+    // Start servicing the GUI
     while (!stop) {
-        // Read the soil moisture sensor reading
-        // Moisture_readSensor();
-        int vmc = Moisture_getVMC();
-        float temperature = Moisture_getTemp();
-
-        // Read the ambient light sensor reading
-        int lux = Light_getLumens();
-
-        // Get the pump status
-        bool pumpOn = PC_getStatus();
-
-        // Send the data to the LCD screen
-        LCD_Response res = {vmc, lux, temperature, pumpOn};
-        LCD_generateResponse(&res);
-
-        // Process pump request from LCD
+        // Read the request from the GUI
         LCD_Request req = {0};
-        ssize_t bytes = LCD_getRequest(&req);
-        if (bytes != 0 && bytes != -1) {
+        ssize_t bytes_read = read(req_fifo,&req,sizeof(req));
+        if (bytes_read > 0) {
             if (req.togglePump) {
                 PC_togglePump();
-            } 
+            }
         }
 
-        // Sleep for 1s
+        // Collecting data to send back to the GUI
+        int vmc = Moisture_getVMC();
+        float temperature = Moisture_getTemp();
+        int lux = Light_getLumens();
+        bool pumpOn = PC_getStatus();
+        LCD_Response res = {vmc, lux, temperature, pumpOn};
+        
+        // Sending back the data
+        if (res_fifo < 0) {
+            res_fifo = open(LCD_RESPONSE,O_WRONLY|O_NONBLOCK);
+            if (res_fifo < 0) {
+                printf("lcd: Unable to access response FIFO\n");
+            } 
+        }
+        write(res_fifo, &res, sizeof(res));
         sleep(1);
     }
+
+    close(res_fifo);
+    close(req_fifo);
 
     return NULL;
 }
@@ -53,17 +63,21 @@ static void *startLCDHandler(void *input) {
 void LCD_init() {
     stop = false;   
 
+    // Unlink the old FIFOs
+    unlink(LCD_REQUEST);
+    unlink(LCD_RESPONSE);
+
     // Make the FIFO
     int file = mkfifo(LCD_REQUEST, 0666); 
     if (file < 0) {
-        printf("Unable to create the FIFO");
+        printf("Unable to create the FIFO\n");
         exit(-1);
     }
 
     // Make the FIFO
     file = mkfifo(LCD_RESPONSE, 0666); 
     if (file < 0) {
-        printf("Unable to create the FIFO");
+        printf("Unable to create the FIFO\n");
         exit(-1);
     }
 
@@ -85,84 +99,4 @@ void LCD_cleanUp() {
         fprintf(stdout, "Unable to join LCD handler thread!\n");
         exit(-1);
     }
-}
-
-#endif
-
-// ----------------------------------------------------------------------------------------------------------------------------------------------
-
-// Write the data to the FIFO
-void LCD_generateResponse(LCD_Response *res) {
-    // Open the named pipe (FIFO)
-    int lcd_fifo = open(LCD_RESPONSE,O_WRONLY|O_NONBLOCK);
-    if(lcd_fifo < 0) {
-        printf("Error in opening %s\n", LCD_RESPONSE);
-    }
-
-    // Transfer data to LCD
-    ssize_t bytes_written = write(lcd_fifo,res,sizeof(LCD_Response));
-    if (bytes_written != sizeof(LCD_Response)) {
-        printf("Unable to write the whole data to the pipe!\n");
-    }
-
-    // Close the named pipe (FIFO)
-    close(lcd_fifo);
-}
-
-void LCD_generateRequest(LCD_Request *req) {
-    // Open the named pipe (FIFO)
-    int lcd_fifo = open(LCD_REQUEST,O_WRONLY|O_NONBLOCK);
-    if(lcd_fifo < 0) {
-        printf("Error in opening %s\n", LCD_REQUEST);
-    }
-
-    // Transfer data to LCD
-    ssize_t bytes_written = write(lcd_fifo,req,sizeof(LCD_Request));
-    if (bytes_written != sizeof(LCD_Request)) {
-        printf("Unable to write the whole data to the pipe!\n");
-    }
-
-    // Close the named pipe (FIFO)
-    close(lcd_fifo);
-}
-
-// ----------------------------------------------------------------------------------------------------------------------------------------------
-
-// Read the request from the FIFO
-ssize_t LCD_getResponse(LCD_Response *res) {
-    // Open the named pipe (FIFO)
-    int lcd_fifo = open(LCD_RESPONSE,O_RDONLY|O_NONBLOCK);
-    if(lcd_fifo < 0) {
-        printf("Error in opening %s\n", LCD_RESPONSE);
-    }
-
-    // Transfer data to LCD
-    ssize_t bytes_read = read(lcd_fifo,res,sizeof(LCD_Response));
-    if (bytes_read != -1) {
-        printf("Unable to read the data from FIFO!\n");
-    }
-
-    // Close the named pipe (FIFO)
-    close(lcd_fifo);
-
-    return bytes_read;
-}
-
-ssize_t LCD_getRequest(LCD_Request *req) {
-    // Open the named pipe (FIFO)
-    int lcd_fifo = open(LCD_REQUEST,O_RDONLY|O_NONBLOCK);
-    if(lcd_fifo < 0) {
-        printf("Error in opening %s\n", LCD_REQUEST);
-    }
-
-    // Transfer data to LCD
-    ssize_t bytes_read = read(lcd_fifo,req,sizeof(LCD_Request));
-    if (bytes_read != -1) {
-        printf("Unable to read the data from FIFO!\n");
-    }
-
-    // Close the named pipe (FIFO)
-    close(lcd_fifo);
-
-    return bytes_read;
 }

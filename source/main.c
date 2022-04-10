@@ -12,7 +12,7 @@
 #include "lcd.h"
 
 // Launch the GUI on the touch screen
-static inline void GUI_init() {
+static inline pid_t GUI_init() {
     // Tell the system to launch the GUI on the attached screen
     pid_t pid = fork();
     if (pid < 0) {
@@ -25,21 +25,28 @@ static inline void GUI_init() {
         execlp("./plant_gui", "./plant_gui", NULL);
         exit(-1);
     } 
+    return pid;
 }
 
 int main() {
-    // Initialize the back-end modules && the GUI
+    // Initialize the back-end modules 
     PC_initPump();
     Health_initMonitor();
-    // LCD_init();
+    LCD_init();
     UDP_initServer();
-    // GUI_init();
+
+    // Init the GUI
+    pid_t child_pid = GUI_init();
 
     // Clean-up the back-end process
     UDP_stopServer();
-    // LCD_cleanUp();
+    LCD_cleanUp();
     Health_stopMonitor();
     PC_cleanUp();
-    
+
+    kill(child_pid, SIGKILL);
+    wait(NULL);
+    printf("Process ID = %d has been terminated\n", child_pid);
+
     return 0;
 }

@@ -49,10 +49,11 @@ XLINKDIR = $(patsubst %,-Xlinker -rpath-link=%,$(XLINK_LIBDIR))
 CFLAGS = -Wall -g -std=c99 -D _POSIX_C_SOURCE=200809L -Werror -Iinclude
 
 all: node
+	mkdir -p $(PUBDIR)/Automatic-Plant-Care/tmp
 	mkdir -p $(PUBDIR)/Automatic-Plant-Care/scripts
 	cp -R scripts/* $(PUBDIR)/Automatic-Plant-Care/scripts
 	$(CC_C) $(CFLAGS)  $(SOURCES) -o $(OUTDIR)/$(TARGET) -lpthread -lm 
-	$(CC_C) $(CFLAGS) $(LIBDIR) -pthread $(INCDIR) $(XLINKDIR) $(LIB) -DGUI source/lcd.c gui/plant_gui.c -o $(OUTDIR)/plant_gui
+	$(CC_C) $(CFLAGS) $(LIBDIR) -pthread $(INCDIR) $(XLINKDIR) $(LIB) -DGUI gui/plant_gui.c -o $(OUTDIR)/plant_gui
 	cp -R screens $(PUBDIR)/Automatic-Plant-Care/
 
 node:

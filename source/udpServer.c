@@ -30,7 +30,7 @@ moist_min {min_threshold} -- Change the minimum safety threshold for moisture.\n
 moist_max {max_threshold} -- Change the maximum safety threshold for moisture.\n\
 light_min {min_threshold} -- Change the minimum safety threshold for light.\n\
 light_max {max_threshold} -- Change the maximum safety threshold for light.\n\
-get [email/moist/light/moist_min/moist_max/light_min/light_max] -- Get the specified information from the target.\n\
+get [email/moist/light/pump/moist_min/moist_max/light_min/light_max] -- Get the specified information from the target.\n\
 stop -- cause the server program to end.\n\
 <enter> -- repeat last command."
 
@@ -237,6 +237,16 @@ static void *startServer(void *input) {
                 }
 
                 snprintf(messageTx, MSG_MAX_LEN, "light:%s\n", light_level_text);
+            } else if (!strncmp(tok, "pump\n", MSG_MAX_LEN)) {
+                int isOn = PC_getStatus();
+                char state[4];
+                if (isOn) {
+                    strncpy(state, "On", 4);
+                } else {
+                    strncpy(state, "Off", 4);
+                }
+
+                snprintf(messageTx, MSG_MAX_LEN, "pump:%s\n", state);
             } else if (!strncmp(tok, "moist_min\n", MSG_MAX_LEN)) {
                 int threshold = Moisture_getMinThreshold();
 
