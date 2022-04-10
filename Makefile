@@ -53,7 +53,7 @@ all: node
 	mkdir -p $(PUBDIR)/Automatic-Plant-Care/scripts
 	cp -R scripts/* $(PUBDIR)/Automatic-Plant-Care/scripts
 	$(CC_C) $(CFLAGS)  $(SOURCES) -o $(OUTDIR)/$(TARGET) -lpthread -lm 
-	$(CC_C) $(CFLAGS) $(LIBDIR) -pthread $(INCDIR) $(XLINKDIR) $(LIB) -DGUI gui/plant_gui.c -o $(OUTDIR)/plant_gui
+	$(CC_C) $(CFLAGS) $(LIBDIR) -pthread $(INCDIR) $(XLINKDIR) $(LIB) -DGUI gui/plant_gui.c -o $(OUTDIR)/plant-gui
 	cp -R screens $(PUBDIR)/Automatic-Plant-Care/
 
 node:

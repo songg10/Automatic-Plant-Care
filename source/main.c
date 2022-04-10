@@ -22,7 +22,7 @@ static inline pid_t GUI_init() {
 
     if (pid == 0) {
         // Child proces
-        execlp("./plant_gui", "./plant_gui", NULL);
+        execlp("./plant-gui", "./plant-gui", NULL);
         exit(-1);
     } 
     return pid;

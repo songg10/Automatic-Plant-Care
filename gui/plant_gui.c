@@ -13,9 +13,9 @@ static int req_fifo;
 static int res_fifo;
 
 static gboolean updateParameters(void);
-static void PumpClicked(GtkButton* self, gpointer user_data);
-static int DataRead();
-static void openRequestFIFO();
+static void pumpClicked(GtkButton* self, gpointer user_data);
+static int dataRead(void);
+static void openRequestFIFO(void);
 
 int main (int argc, char *argv[]) {
 	GtkWidget *window; 
@@ -49,7 +49,7 @@ int main (int argc, char *argv[]) {
 
 	// Connecting event handler for pump button
 	widget = GTK_WIDGET(gtk_builder_get_object(builder, "PumpButton"));
-	g_signal_connect(GTK_WIDGET(widget), "clicked", G_CALLBACK(PumpClicked), NULL);
+	g_signal_connect(GTK_WIDGET(widget), "clicked", G_CALLBACK(pumpClicked), NULL);
 
 	// Update the parameters once every 15 seconds
 	g_timeout_add_seconds(1, (GSourceFunc)updateParameters, NULL);
@@ -74,7 +74,7 @@ static gboolean updateParameters(void) {
 	char label[10];
      
     // Read the data from the FIFO
-	int ok = DataRead();
+	int ok = dataRead();
 	if (!ok) {
 		return G_SOURCE_CONTINUE;
 	}
@@ -112,7 +112,7 @@ static gboolean updateParameters(void) {
 	return G_SOURCE_CONTINUE;
 }
 
-static void PumpClicked(GtkButton* self, gpointer user_data) {
+static void pumpClicked(GtkButton* self, gpointer user_data) {
 	if(req_fifo < 0) {
 		openRequestFIFO();
 	}
@@ -123,7 +123,7 @@ static void PumpClicked(GtkButton* self, gpointer user_data) {
 	return;
 }
 
-static int DataRead() {
+static int dataRead() {
 	struct pollfd fifo_poll;
 	fifo_poll.fd         = res_fifo;
 	fifo_poll.events     = POLLIN;
