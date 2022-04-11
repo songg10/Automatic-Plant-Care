@@ -10,6 +10,7 @@
 #include "light_sensor.h"
 #include "moisture_sensor.h"
 #include "lcd.h"
+#include "backup.h"
 
 // Launch the GUI on the touch screen
 static inline void GUI_init() {
@@ -28,6 +29,20 @@ static inline void GUI_init() {
 }
 
 int main() {
+
+    // How I suggest starting the program to include backup:
+    // Check if the backup file exists (ie user has already set up the plant)
+    // If it exists, simply reload the saved values
+    // Otherwise, set the plant's DOB to today's date. 
+    //
+    // if (access(BACKUP_FILE, F_OK) == 0) {
+    //     restore_info();
+    // } 
+    // else {
+    //     Age_reset_dob();
+    // }
+
+
     // Initialize the back-end modules && the GUI
     PC_initPump();
     Health_initMonitor();

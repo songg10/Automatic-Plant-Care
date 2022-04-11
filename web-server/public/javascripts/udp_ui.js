@@ -27,6 +27,12 @@ $(document).ready(function() {
 		sendCommand("sample\n");
 	});
 
+  	// Adjust DOB
+  	$("#setDOB").click(function(){
+		var value = $("plantDOB").val()
+		sendCommand("DOB " + value + "\n");
+	});
+
 	// Adjust pump
 	$("#pumpOn").click(function(){
 		sendCommand("pump on\n");
@@ -93,6 +99,12 @@ function handleReplies() {
 				break;
 			case "moist":
 				$("#moistStatus").html(reply[1]);
+				break;
+      case "DOB":
+        $("#DOB").html(reply[1]);
+				break;
+      case "age":
+        $("#plantAge").html(reply[1]);
 				break;
 			case "moist_min":
 				$("#range-slider-moist-min").val(reply[1]);

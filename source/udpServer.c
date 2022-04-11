@@ -12,6 +12,7 @@
 #include "pump_control.h"
 #include "moisture_sensor.h"
 #include "light_sensor.h"
+#include "age.h"
 
 // This should be able to handle max email length (320 characters)
 #define MSG_MAX_LEN    1500
@@ -24,13 +25,14 @@
 #define HELP_MENU   "Accepted commands:\n\
 help -- display all available commands.\n\
 email {user_email@address.domain}-- Change the user's email address.\n\
+DOB {dd-mm-yyyy} -- Set a DOB for the plant. \n\
 sample -- Send an sample email address to the user.\n\
 pump [on/off] -- Turn the pump on/off manually.\n\
 moist_min {min_threshold} -- Change the minimum safety threshold for moisture.\n\
 moist_max {max_threshold} -- Change the maximum safety threshold for moisture.\n\
 light_min {min_threshold} -- Change the minimum safety threshold for light.\n\
 light_max {max_threshold} -- Change the maximum safety threshold for light.\n\
-get [email/moist/light/moist_min/moist_max/light_min/light_max] -- Get the specified information from the target.\n\
+get [email/moist/light/moist_min/moist_max/light_min/light_max/dob/age] -- Get the specified information from the target.\n\
 stop -- cause the server program to end.\n\
 <enter> -- repeat last command."
 
@@ -122,7 +124,42 @@ static void *startServer(void *input) {
             Health_setUserEmail(tok);
 
             snprintf(messageTx, MSG_MAX_LEN, "Done\n");
-        } else if(!strncmp(tok, "sample\n", MSG_MAX_LEN)) {
+        } else if(!strncmp(tok, "DOB", MSG_MAX_LEN)) {
+            // Get the next token
+            tok = strtok(NULL, " ");
+            
+            struct date dob;
+            tok = strtok(tok, "-");
+            int index = 0;
+            do{
+                dob.day = atoi(tok);
+                index++;
+                tok = strtok(NULL, "-");
+                if(index == 1)
+                    dob.month = atoi(tok);
+                else if(index == 2)
+                    dob.year = atoi(tok);
+            }while(tok != NULL);
+            int month_31[7] = {1,3,5,7,8,10,12};
+            int month_30[4] = {4,6,9,11};
+            if(dob.month == 2){
+                if(dob.year % 400 == 0 || dob.year % 4 == 0)
+                    dob.day_in_month = 29;
+                else
+                    dob.day_in_month = 28;
+            }
+            for(int i = 0; i < 7; i++){
+                if(dob.month == month_31[i])
+                    dob.day_in_month = 31;
+            }
+            for(int i = 0; i < 4; i++){
+                if(dob.month == month_30[i])
+                    dob.day_in_month = 30;
+            }
+            Age_set_dob(dob);
+            
+            snprintf(messageTx, MSG_MAX_LEN, "Done\n");
+        }else if(!strncmp(tok, "sample\n", MSG_MAX_LEN)) {
             Health_sendSampleEmail();
 
             snprintf(messageTx, MSG_MAX_LEN, "Done\n");
@@ -212,7 +249,17 @@ static void *startServer(void *input) {
                 char *email = Health_getUserEmail();
 
                 snprintf(messageTx, MSG_MAX_LEN, "email:%s\n", email);
-            } else if (!strncmp(tok, "moist\n", MSG_MAX_LEN)) {
+            } else if(!strncmp(tok, "dob\n", MSG_MAX_LEN)) {
+                struct date dob = Age_get_dob();
+                snprintf(messageTx, MSG_MAX_LEN, "Plant DOB: %d", dob.day);
+                snprintf(messageTx, MSG_MAX_LEN, "%d-", dob.month);
+                snprintf(messageTx, MSG_MAX_LEN, "%d-\n", dob.year);
+            } else if(!strncmp(tok, "age\n", MSG_MAX_LEN)) {
+                struct date age = Age_get_age();
+                snprintf(messageTx, MSG_MAX_LEN, "Plant age: %d years ", age.year);
+                snprintf(messageTx, MSG_MAX_LEN, "%d days \n", age.day);
+            }
+            else if (!strncmp(tok, "moist\n", MSG_MAX_LEN)) {
                 // Moisture_readSensor();
                 int moist_level = Moisture_getStatus();
                 char moist_level_text[STATUS_MAX_LEN];

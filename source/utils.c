@@ -2,6 +2,8 @@
 
 #include "utils.h"
 
+#define MAX_LENGTH 1024
+
 int Utils_readFromFileToScreen(const char *fileName) {
     FILE *pFile = fopen(fileName, "r");
     if (pFile == NULL) {
@@ -10,7 +12,6 @@ int Utils_readFromFileToScreen(const char *fileName) {
     }
 
     // Read string (line)
-    const int MAX_LENGTH = 1024;
     char buff[MAX_LENGTH];
     fgets(buff, MAX_LENGTH, pFile);
 
@@ -34,4 +35,32 @@ void Utils_writeToFile(const char *fileName, const char *command) {
     }
 
     fclose(pFile);
+}
+
+int Utils_read_bin(const char* fileName, char* buffer)
+{
+    FILE *read_ptr;
+    read_ptr = fopen(fileName, "r");
+    if (read_ptr == NULL){
+        return -1;
+    }
+    int i = fread(buffer, MAX_LENGTH, 1, read_ptr);
+    buffer[i] = '\0';
+    fclose(read_ptr);
+    return 0;
+}
+
+int Utils_write_bin(const char* fileName, const char* value, int size)
+{
+    FILE *write_ptr;
+    write_ptr = fopen(fileName, "w");
+    if (write_ptr == NULL){
+        return -1;
+    }
+    if (fwrite(value, size, 1, write_ptr) != size){
+        fclose(write_ptr);
+        return -1;
+    }
+    fclose(write_ptr);
+    return 0;
 }
