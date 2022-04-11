@@ -10,6 +10,7 @@
 #include "light_sensor.h"
 #include "pump_control.h"
 #include "moisture_sensor.h"
+#include "watchdog.h"
 
 // Maximum email name length is 320 characters + 1 null character
 #define MAX_EMAIL_SIZE 321
@@ -59,7 +60,7 @@ static void *startMonitoring(void *input) {
 
             send_email_noti(moisture_health, light_health, false);
         }
-        
+        hitWatchdogOnKeypress();
         // Check once every 15 seconds
         sleep(15);
     }

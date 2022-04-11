@@ -10,6 +10,7 @@
 #include "light_sensor.h"
 #include "moisture_sensor.h"
 #include "lcd.h"
+#include "watchdog.h"
 
 // Launch the GUI on the touch screen
 static inline pid_t GUI_init() {
@@ -29,6 +30,8 @@ static inline pid_t GUI_init() {
 }
 
 int main() {
+    changeWatchdogTimeout(45);
+
     // Initialize the back-end modules 
     PC_initPump();
     Health_initMonitor();
