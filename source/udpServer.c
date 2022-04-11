@@ -13,6 +13,7 @@
 #include "moisture_sensor.h"
 #include "light_sensor.h"
 #include "age.h"
+#include "backup.h"
 
 // This should be able to handle max email length (320 characters)
 #define MSG_MAX_LEN    1500
@@ -98,7 +99,8 @@ static void *startServer(void *input) {
         // If only enter was pressed => Changed tok to latest command
         if (!strncmp(messageRx, "\n", MSG_MAX_LEN)) {
             strncpy(messageRx, last_command, MSG_MAX_LEN);
-        } else {
+        } 
+        else {
             strncpy(last_command, messageRx, MSG_MAX_LEN);
         }
 
@@ -114,7 +116,16 @@ static void *startServer(void *input) {
         // => strcmp is perfectly safe to use
         if (!strncmp(tok, "help\n", MSG_MAX_LEN)) {
             snprintf(messageTx, MSG_MAX_LEN, "%s\n", HELP_MENU);
-        } else if(!strncmp(tok, "email", MSG_MAX_LEN)) {
+        } 
+        else if(!strncmp(tok, "backup", MSG_MAX_LEN)) {
+            backup_info();
+            snprintf(messageTx, MSG_MAX_LEN, "Done\n");
+        } 
+        else if(!strncmp(tok, "restore", MSG_MAX_LEN)) {
+            restore_info();
+            snprintf(messageTx, MSG_MAX_LEN, "Done\n");
+        } 
+        else if(!strncmp(tok, "email", MSG_MAX_LEN)) {
             // Get the next token
             tok = strtok(NULL, " ");
 
@@ -124,46 +135,25 @@ static void *startServer(void *input) {
             Health_setUserEmail(tok);
 
             snprintf(messageTx, MSG_MAX_LEN, "Done\n");
-        } else if(!strncmp(tok, "DOB", MSG_MAX_LEN)) {
-            // Get the next token
-            tok = strtok(NULL, " ");
-            
-            struct date dob;
-            tok = strtok(tok, "-");
-            int index = 0;
-            do{
-                dob.day = atoi(tok);
-                index++;
-                tok = strtok(NULL, "-");
-                if(index == 1)
-                    dob.month = atoi(tok);
-                else if(index == 2)
-                    dob.year = atoi(tok);
-            }while(tok != NULL);
-            int month_31[7] = {1,3,5,7,8,10,12};
-            int month_30[4] = {4,6,9,11};
-            if(dob.month == 2){
-                if(dob.year % 400 == 0 || dob.year % 4 == 0)
-                    dob.day_in_month = 29;
-                else
-                    dob.day_in_month = 28;
+        } 
+        else if(!strncmp(tok, "dob", MSG_MAX_LEN)) {
+            if (messageRx[4] == 'r'){
+                Age_reset_dob();
             }
-            for(int i = 0; i < 7; i++){
-                if(dob.month == month_31[i])
-                    dob.day_in_month = 31;
+            else{
+                struct date dob;
+                dob.year = atoi(&messageRx[4]);
+                dob.month = atoi(&messageRx[9]);
+                dob.day_in_month = atoi(&messageRx[12]);
+                Age_set_dob(dob);
             }
-            for(int i = 0; i < 4; i++){
-                if(dob.month == month_30[i])
-                    dob.day_in_month = 30;
-            }
-            Age_set_dob(dob);
-            
             snprintf(messageTx, MSG_MAX_LEN, "Done\n");
-        }else if(!strncmp(tok, "sample\n", MSG_MAX_LEN)) {
+        }
+        else if(!strncmp(tok, "sample\n", MSG_MAX_LEN)) {
             Health_sendSampleEmail();
-
             snprintf(messageTx, MSG_MAX_LEN, "Done\n");
-        } else if(!strncmp(tok, "pump", MSG_MAX_LEN)) {
+        } 
+        else if(!strncmp(tok, "pump", MSG_MAX_LEN)) {
             // Get the next token
             tok = strtok(NULL, " ");
             
@@ -185,7 +175,8 @@ static void *startServer(void *input) {
             // Send back the status of the pump to update
             // on the browser
             snprintf(messageTx, MSG_MAX_LEN, "pump:%s\n", status);
-        } else if(!strncmp(tok, "moist_min", MSG_MAX_LEN)) {
+        } 
+        else if(!strncmp(tok, "moist_min", MSG_MAX_LEN)) {
             // Get the next token
             tok = strtok(NULL, " ");
             
@@ -199,7 +190,8 @@ static void *startServer(void *input) {
             threshold = Moisture_getMinThreshold();
 
             snprintf(messageTx, MSG_MAX_LEN, "moist_min:%d\n", threshold);
-        } else if(!strncmp(tok, "moist_max", MSG_MAX_LEN)) {
+        } 
+        else if(!strncmp(tok, "moist_max", MSG_MAX_LEN)) {
             // Get the next token
             tok = strtok(NULL, " ");
             
@@ -213,7 +205,8 @@ static void *startServer(void *input) {
             threshold = Moisture_getMaxThreshold();
 
             snprintf(messageTx, MSG_MAX_LEN, "moist_max:%d\n", threshold);
-        } else if (!strncmp(tok, "light_min", MSG_MAX_LEN)) {
+        } 
+        else if (!strncmp(tok, "light_min", MSG_MAX_LEN)) {
             // Get the next token
             tok = strtok(NULL, " ");
             
@@ -227,7 +220,8 @@ static void *startServer(void *input) {
             threshold = Light_getMinThreshold();
 
             snprintf(messageTx, MSG_MAX_LEN, "light_min:%d\n", threshold);
-        } else if (!strncmp(tok, "light_max", MSG_MAX_LEN)) {
+        } 
+        else if (!strncmp(tok, "light_max", MSG_MAX_LEN)) {
             // Get the next token
             tok = strtok(NULL, " ");
             
@@ -241,23 +235,30 @@ static void *startServer(void *input) {
             threshold = Light_getMaxThreshold();
 
             snprintf(messageTx, MSG_MAX_LEN, "light_max:%d\n", threshold);
-        } else if (!strncmp(tok, "get", MSG_MAX_LEN)) {
+        } 
+        else if (!strncmp(tok, "get", MSG_MAX_LEN)) {
             // Get the next token
             tok = strtok(NULL, " ");
             
             if (!strncmp(tok, "email\n", MSG_MAX_LEN)) {
                 char *email = Health_getUserEmail();
-
                 snprintf(messageTx, MSG_MAX_LEN, "email:%s\n", email);
-            } else if(!strncmp(tok, "dob\n", MSG_MAX_LEN)) {
+            } 
+            else if(!strncmp(tok, "dob\n", MSG_MAX_LEN)) {
                 struct date dob = Age_get_dob();
-                snprintf(messageTx, MSG_MAX_LEN, "Plant DOB: %d", dob.day);
-                snprintf(messageTx, MSG_MAX_LEN, "%d-", dob.month);
-                snprintf(messageTx, MSG_MAX_LEN, "%d-\n", dob.year);
-            } else if(!strncmp(tok, "age\n", MSG_MAX_LEN)) {
+                snprintf(messageTx, MSG_MAX_LEN, "dob: %d-%d-%d \n", dob.day_in_month, dob.month, dob.year);
+            } 
+            else if(!strncmp(tok, "age\n", MSG_MAX_LEN)) {
                 struct date age = Age_get_age();
-                snprintf(messageTx, MSG_MAX_LEN, "Plant age: %d years ", age.year);
-                snprintf(messageTx, MSG_MAX_LEN, "%d days \n", age.day);
+                if (age.year != 0){
+                    snprintf(messageTx, MSG_MAX_LEN, "age: %d years \n", age.year);
+                }
+                else if (age.month != 0){
+                    snprintf(messageTx, MSG_MAX_LEN, "age: %d months \n", age.month);
+                }
+                else{
+                    snprintf(messageTx, MSG_MAX_LEN, "age: %d days \n", age.day);
+                }
             }
             else if (!strncmp(tok, "moist\n", MSG_MAX_LEN)) {
                 // Moisture_readSensor();
@@ -270,9 +271,9 @@ static void *startServer(void *input) {
                 } else {
                     strncpy(moist_level_text, "Excessive", STATUS_MAX_LEN);
                 }
-
                 snprintf(messageTx, MSG_MAX_LEN, "moist:%s\n", moist_level_text);
-            } else if (!strncmp(tok, "light\n", MSG_MAX_LEN)) {
+            } 
+            else if (!strncmp(tok, "light\n", MSG_MAX_LEN)) {
                 int light_level = Light_getStatus();
                 char light_level_text[STATUS_MAX_LEN];
                 if (light_level < 0) {
@@ -282,32 +283,34 @@ static void *startServer(void *input) {
                 } else {
                     strncpy(light_level_text, "Excessive",  STATUS_MAX_LEN);
                 }
-
                 snprintf(messageTx, MSG_MAX_LEN, "light:%s\n", light_level_text);
-            } else if (!strncmp(tok, "moist_min\n", MSG_MAX_LEN)) {
+            } 
+            else if (!strncmp(tok, "moist_min\n", MSG_MAX_LEN)) {
                 int threshold = Moisture_getMinThreshold();
-
                 snprintf(messageTx, MSG_MAX_LEN, "moist_min:%d\n", threshold);
-            } else if (!strncmp(tok, "moist_max\n", MSG_MAX_LEN)) {
+            } 
+            else if (!strncmp(tok, "moist_max\n", MSG_MAX_LEN)) {
                 int threshold = Moisture_getMaxThreshold();
-
                 snprintf(messageTx, MSG_MAX_LEN, "moist_max:%d\n", threshold);
-            } else if (!strncmp(tok, "light_min\n", MSG_MAX_LEN)) {
+            } 
+            else if (!strncmp(tok, "light_min\n", MSG_MAX_LEN)) {
                 int threshold = Light_getMinThreshold();
-
                 snprintf(messageTx, MSG_MAX_LEN, "light_min:%d\n", threshold);
-            } else if (!strncmp(tok, "light_max\n", MSG_MAX_LEN)) {
+            } 
+            else if (!strncmp(tok, "light_max\n", MSG_MAX_LEN)) {
                 int threshold = Light_getMaxThreshold();
-
                 snprintf(messageTx, MSG_MAX_LEN, "light_max:%d\n", threshold);
-            } else {
+            } 
+            else {
                 snprintf(messageTx, MSG_MAX_LEN, "Invalid command. Type 'help' for command list\n");
             }
-        } else if(!strncmp(tok, "stop\n", MSG_MAX_LEN)) {
+        } 
+        else if(!strncmp(tok, "stop\n", MSG_MAX_LEN)) {
             stop = true;
 
             snprintf(messageTx, MSG_MAX_LEN, "Program terminating\n");
-        } else {
+        } 
+        else {
             snprintf(messageTx, MSG_MAX_LEN, "Invalid command. Type 'help' for command list\n");
         }
         send_packet(&socketDescriptor, messageTx, &sinRemote);
