@@ -62,7 +62,7 @@ static void *startMonitoring(void *input) {
         }
 
         // Hit the watchdog
-        WD_hitWatchdog();
+        // WD_hitWatchdog();
         
         // Check once every 15 seconds
         sleep(15);

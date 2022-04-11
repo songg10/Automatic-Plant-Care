@@ -31,16 +31,18 @@ static inline pid_t GUI_init() {
 
 int main() {
     // Set up the watchdog with an interval of 45s
-    WD_changeTimeout(45);
+    // WD_changeTimeout(45);
 
-    // Initialize the back-end modules 
+    // Initialize the pump
     PC_initPump();
-    Health_initMonitor();
-    LCD_init();
-    UDP_initServer();
 
     // Init the GUI
     pid_t child_pid = GUI_init();
+
+    // Init the back-end threads
+    Health_initMonitor();
+    LCD_init();
+    UDP_initServer();
 
     // Clean-up the back-end process
     UDP_stopServer();
