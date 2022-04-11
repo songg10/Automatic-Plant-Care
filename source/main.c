@@ -35,17 +35,17 @@ int main() {
     // If it exists, simply reload the saved values
     // Otherwise, set the plant's DOB to today's date. 
     //
-    // if (access(BACKUP_FILE, F_OK) == 0) {
-    //     restore_info();
-    // } 
-    // else {
-    //     Age_reset_dob();
-    // }
+    if (access(BACKUP_FILE, F_OK) == 0) {
+        restore_info();
+    } 
+    else {
+        Age_reset_dob();
+    }
 
 
     // Initialize the back-end modules && the GUI
-    PC_initPump();
-    Health_initMonitor();
+    // PC_initPump();
+    // Health_initMonitor();
     // LCD_init();
     UDP_initServer();
     // GUI_init();
@@ -53,7 +53,7 @@ int main() {
     // Clean-up the back-end process
     UDP_stopServer();
     // LCD_cleanUp();
-    Health_stopMonitor();
+    // Health_stopMonitor();
     PC_cleanUp();
     
     return 0;
