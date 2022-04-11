@@ -253,9 +253,6 @@ static void *startServer(void *input) {
                 if (age.year != 0){
                     snprintf(messageTx, MSG_MAX_LEN, "age: %d years \n", age.year);
                 }
-                else if (age.month != 0){
-                    snprintf(messageTx, MSG_MAX_LEN, "age: %d months \n", age.month);
-                }
                 else{
                     snprintf(messageTx, MSG_MAX_LEN, "age: %d days \n", age.day);
                 }
