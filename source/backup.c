@@ -1,4 +1,6 @@
 #include "backup.h"
+#define MAX_LENGTH  1024
+
 
 int backup_info(void)
 {
@@ -11,9 +13,10 @@ int backup_info(void)
     struct date dob = Age_get_dob();
     // concatenate values into one string
     char buffer[MAX_LENGTH];
-    snprintf(buffer, MAX_LENGTH, "%s\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", 
+    snprintf(buffer, MAX_LENGTH, "%s %d %d %d %d %d %d %d %d\n", 
              email, min_light, max_light, min_moisture, max_moisture, 
              dob.year, dob.month, dob.day_in_month, dob.day);
+    printf("%s\n", buffer);
     // write the string to the backup file
     return Utils_write_bin(BACKUP_FILE, buffer, strlen(buffer)+1);
 }
@@ -24,6 +27,7 @@ int restore_info(void)
     char* buffer = malloc(MAX_LENGTH);
     memset(buffer, 0, MAX_LENGTH);
     if (Utils_read_bin(BACKUP_FILE, buffer) == -1){
+        printf("Error reading the backup file.\n");
         return -1;
     }
     // tokenize the buffer we have read into

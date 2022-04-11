@@ -39,13 +39,11 @@ void Utils_writeToFile(const char *fileName, const char *command) {
 
 int Utils_read_bin(const char* fileName, char* buffer)
 {
-    FILE *read_ptr;
-    read_ptr = fopen(fileName, "r");
+    FILE *read_ptr = fopen(fileName, "r");
     if (read_ptr == NULL){
         return -1;
     }
-    int i = fread(buffer, MAX_LENGTH, 1, read_ptr);
-    buffer[i] = '\0';
+    fgets(buffer, MAX_LENGTH, read_ptr);
     fclose(read_ptr);
     return 0;
 }
