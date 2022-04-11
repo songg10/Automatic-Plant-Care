@@ -30,7 +30,8 @@ static inline pid_t GUI_init() {
 }
 
 int main() {
-    changeWatchdogTimeout(45);
+    // Set up the watchdog with an interval of 45s
+    WD_changeTimeout(45);
 
     // Initialize the back-end modules 
     PC_initPump();

@@ -51,13 +51,12 @@ CFLAGS = -Wall -g -std=c99 -D _POSIX_C_SOURCE=200809L -Werror -Iinclude
 #add systemd according to prof makefile
 OUTPUTS= $(addprefix $(OUTDIR)/, $(TARGET))
 
-all: node
+all: node systemd
 	mkdir -p $(PUBDIR)/Automatic-Plant-Care/tmp
 	mkdir -p $(PUBDIR)/Automatic-Plant-Care/scripts
 	cp -R scripts/* $(PUBDIR)/Automatic-Plant-Care/scripts
 	$(CC_C) $(CFLAGS)  $(SOURCES) -o $(OUTDIR)/$(TARGET) -lpthread -lm 
 	$(CC_C) $(CFLAGS) $(LIBDIR) -pthread $(INCDIR) $(XLINKDIR) $(LIB) -DGUI gui/plant_gui.c -o $(OUTDIR)/plant-gui
-	$(TARGET) systemd
 	cp -R screens $(PUBDIR)/Automatic-Plant-Care/
 
 systemd:

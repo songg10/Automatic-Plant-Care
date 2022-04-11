@@ -13,12 +13,17 @@
 
 #include "watchdog.h"
 
+static void dieOnError(_Bool successCondition, char *message) {
+	if (!successCondition) {
+		fprintf(stderr, "ERROR: %s\n", message);
+		fprintf(stderr, "Error string: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+}
 
-static int timeout = 0;
-
-void changeWatchdogTimeout(int timeout_s)
+void WD_changeTimeout(int timeout_s)
 {
-	//printf("Setting watchdog timout to %ds\n", timeout_s);
+	printf("Setting watchdog timout to %ds\n", timeout_s);
 
 	int fd = open("/dev/watchdog", O_RDWR);
 	dieOnError(fd != -1, "Unable to open WD.");
@@ -29,23 +34,18 @@ void changeWatchdogTimeout(int timeout_s)
 	close(fd);
 }
 
-void hitWatchdogOnKeypress()
+void WD_hitWatchdog()
 {
 	int fd = open("/dev/watchdog", O_RDWR);
 	dieOnError(fd != -1, "Unable to open WD.");
 
-    //printf("Hitting WD via ioctl...\n");
+    printf("Hitting WD via ioctl...\n");
     ioctl(fd, WDIOC_KEEPALIVE, NULL);
+
+	// Write a 'V' to disable WD ("Magic Close" feature).
+	// (Some drivers don't respond to Magic Close; some always close)
+	write(fd, "V", 1);
 
 	// Close file to disable watchdog (or exit program auto-closes)
 	close(fd);
-}
-
-void dieOnError(_Bool successCondition, char *message)
-{
-	if (!successCondition) {
-		fprintf(stderr, "ERROR: %s\n", message);
-		fprintf(stderr, "Error string: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
 }

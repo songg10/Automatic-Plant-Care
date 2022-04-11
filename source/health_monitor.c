@@ -60,7 +60,10 @@ static void *startMonitoring(void *input) {
 
             send_email_noti(moisture_health, light_health, false);
         }
-        hitWatchdogOnKeypress();
+
+        // Hit the watchdog
+        WD_hitWatchdog();
+        
         // Check once every 15 seconds
         sleep(15);
     }
