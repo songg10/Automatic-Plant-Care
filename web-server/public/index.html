@@ -19,6 +19,16 @@
 			<p>Light level: 
 				<code><strong><span id="lightStatus"></span></strong></code>
 			</p>
+			<p>Plant age:
+			    <code><strong><span id="plantAge"></span></strong></code>
+			</p>
+			<p>Plant DOB:
+			    <code><strong><span id="DOB"></span></strong></code>
+			</p>
+			<p>
+				<input type="button" id="backup" value="Backup Data"/>
+				<input type="button" id="restore" value="Restore Data"/>
+			</p>
 		</div>
 		
 		<div id='left-box'>
@@ -31,6 +41,14 @@
 				<p>
 					<input type="button" id="confirmEmail" value="Confirm"/>
 					<input type="button" id="sampleEmail" value="Send Sample Email"/>
+				</p>
+				<p>
+				    Plant DOB:
+				    <input type="date"   id="plantDOB"/>
+				</p>
+				<p>
+				    <input type="button" id="setDOB" value="Set DOB"/>
+					<input type="button" id="resetDOB" value="Reset DOB"/>
 				</p>
 				<h3>Pump Control</h3>
 				<p>
@@ -45,29 +63,25 @@
 						<h3>Moisture Safety Threshold</h3>
 						<p>Min:</p>
 						<div class="range-slider-group range-slider-group-moist-min">
-							<input type="range" min="0" max="100" value="50" class="range-slider range-slider-moist-min" id="range-slider-moist-min"/>
-							<input type="text" min="0" max="100" value="50" class="input-slider input-slider-moist-min" id="input-slider-moist-min" size="1"/ readonly>
-							% VMC
+							<input type="range" min="0" max="4095" value="2048" class="range-slider range-slider-moist-min" id="range-slider-moist-min"/>
+							<input type="text" min="0" max="4095" value="2048" class="input-slider input-slider-moist-min" id="input-slider-moist-min" size="1"/ readonly>
 						</div>
 						<p>Max:</p>
 						<div class="range-slider-group range-slider-group-moist-max">
-							<input type="range" min="0" max="100" value="50" class="range-slider range-slider-moist-max" id="range-slider-moist-max"/>
-							<input type="text" min="0" max="100" value="50" class="input-slider input-slider-moist-max" id="input-slider-moist-max" size="1"/ readonly>
-							% VMC
+							<input type="range" min="0" max="4095" value="2048" class="range-slider range-slider-moist-max" id="range-slider-moist-max"/>
+							<input type="text" min="0" max="4095" value="2048" class="input-slider input-slider-moist-max" id="input-slider-moist-max" size="1"/ readonly>
 						</div>
 
 						<h3>Light Safety Threshold</h3>
 						<p>Min:</p>
 						<div class="range-slider-group range-slider-group-light-min">
-							<input type="range" min="0" max="13000" value="1000" class="range-slider range-slider-light-min" id="range-slider-light-min"/>
-							<input type="text" min="0" max="13000" value="1000" class="input-slider input-slider-light-min" id="input-slider-light-min" size="1"/ readonly>
-							lux
+							<input type="range" min="0" max="4095" value="2048" class="range-slider range-slider-light-min" id="range-slider-light-min"/>
+							<input type="text" min="0" max="4095" value="2048" class="input-slider input-slider-light-min" id="input-slider-light-min" size="1"/ readonly>
 						</div>
 						<p>Max:</p>
 						<div class="range-slider-group range-slider-group-light-max">
-							<input type="range" min="0" max="13000" value="1000" class="range-slider range-slider-light-max" id="range-slider-light-max"/>
-							<input type="text" min="0" max="13000" value="1000" class="input-slider input-slider-light-max" id="input-slider-light-max" size="1"/ readonly>
-							lux
+							<input type="range" min="0" max="4095" value="2048" class="range-slider range-slider-light-max" id="range-slider-light-max"/>
+							<input type="text" min="0" max="4095" value="2048" class="input-slider input-slider-light-max" id="input-slider-light-max" size="1"/ readonly>
 						</div>
 					</div>
 				</p>
