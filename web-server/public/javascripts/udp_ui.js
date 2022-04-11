@@ -27,10 +27,25 @@ $(document).ready(function() {
 		sendCommand("sample\n");
 	});
 
+	// Backup data
+	$("#backup").click(function(){
+		sendCommand("backup \n");
+	});
+
+	// restore data
+	$("#restore").click(function(){
+		sendCommand("restore \n");
+	});
+
   	// Adjust DOB
   	$("#setDOB").click(function(){
-		var value = $("plantDOB").val()
-		sendCommand("DOB " + value + "\n");
+		var dateControl = document.querySelector('input[type="date"]');
+		sendCommand("dob " + dateControl.value + "\n");
+	});
+
+	// Reset DOB
+	$("#resetDOB").click(function(){
+		sendCommand("dob reset\n");
 	});
 
 	// Adjust pump
@@ -81,6 +96,8 @@ function getUpdate() {
 	// Get the current volume, tempo, mode
 	sendCommand("get light\n");
 	sendCommand("get moist\n");
+	sendCommand("get dob\n");
+	sendCommand("get age\n");
 }
 
 function handleReplies() {
@@ -100,11 +117,11 @@ function handleReplies() {
 			case "moist":
 				$("#moistStatus").html(reply[1]);
 				break;
-      case "DOB":
-        $("#DOB").html(reply[1]);
-				break;
-      case "age":
-        $("#plantAge").html(reply[1]);
+			case "dob":
+				$("#DOB").html(reply[1]);
+						break;
+			case "age":
+				$("#plantAge").html(reply[1]);
 				break;
 			case "moist_min":
 				$("#range-slider-moist-min").val(reply[1]);
