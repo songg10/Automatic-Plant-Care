@@ -11,7 +11,6 @@
 #include "age.h"
 #include "utils.h"
 
-#define MAX_LENGTH  1024
 #define NUM_ATTRIBUTES 9
 #define BACKUP_FILE "backup.bin"
 
